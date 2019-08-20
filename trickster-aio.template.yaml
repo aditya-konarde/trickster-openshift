@@ -8,12 +8,12 @@ objects:
   kind: DeploymentConfig
   metadata:
     labels:
-      name: trickster
+      app: trickster
     name: trickster
   spec:
     replicas: ${{REPLICAS}}
     selector:
-      service: trickster
+      app: trickster
     strategy:
       resources:
         requests:
@@ -31,7 +31,7 @@ objects:
     template:
       metadata:
         labels:
-          name: trickster
+          app: trickster
         name: trickster
       spec:
         containers:
@@ -54,12 +54,29 @@ objects:
                 - key: trickster-conf
                   path: trickster.conf
 
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    annotations:
+      openshift.io/host.generated: "true"
+    name: trickster
+  spec:
+    port:
+      targetPort: proxy
+    tls:
+      termination: edge
+    to:
+      kind: Service
+      name: trickster
+      weight: 100
+    wildcardPolicy: None
+
 - apiVersion: v1
   kind: ConfigMap
   metadata:
     name: trickster-conf
     labels:
-      name: trickster-conf
+      app: trickster-conf
   data:
     trickster-conf: |-
       [main]
@@ -89,7 +106,7 @@ objects:
           # The default origin
           [origins.default]
               # origin_url defines the URL of the origin. Default is http://prometheus:9090
-              origin_url = ${PROMETHEUS_SVC_URL}
+              origin_url = '${PROMETHEUS_SVC_URL}'
               # api path defines the path of the Prometheus API (usually '/api/v1')
               api_path = '/api/v1'
               # default_step defines the step (in seconds) of a query_range request if one is
@@ -124,7 +141,8 @@ objects:
         targetPort: 8082
         name: metrics
     selector:
-      name: trickster
+      app: trickster
+
 parameters:
 - name: IMAGE_TAG
   value: dummy # needed because saasherder will fail if this parameter doesn't exist
