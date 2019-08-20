@@ -14,7 +14,7 @@ Download this repo and move into directory:
 
 First:
 
-`oc process -f trickster-aio.template.yaml NAMESPACE=foo PROMETHEUS_SVC_URL=bar REPLICAS=3 -o yaml > trickster-aio.processed.yaml`
+`oc process -f trickster-aio.template.yaml -p=REPLICAS=2 -p=TRICKSTER_IMAGE_TAG=latest -p=PROMETHEUS_SVC_URL=http://prometheus.bar.svc:9090 -p=NAMESPACE=bar -o yaml  > trickster-aio.processed.yaml`
 
 > Note: Make sure you replaced the `foo` and `bar` with your desired configuration parameters
 
